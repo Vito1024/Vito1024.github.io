@@ -30,9 +30,9 @@ CREATE TABLE btc.utxo_0 PARTITION OF btc.utxo FOR VALUES WITH (MODULUS 1000, REM
 ```
 
 当解析好utxo数据后，这个表记录了5亿条utxo数据，当我想查询某个地址包含某tag的utxo数据时:
-![query result](image.png)
+![query result](../media/image.png)
 发现耗时365ms，这远远超出我的预期，因为倒排索引过滤数据还是很快的，第一反应是分析一下query plan:
-![query plan before alter index](img_v3_02e8_5487c773-f04a-4123-84c6-0b58aaa0dbhu.jpg)
+![query plan before alter index](../media/img_v3_02e8_5487c773-f04a-4123-84c6-0b58aaa0dbhu.jpg)
 发现还是走了seq scan, 执行引擎并没有使用GIN索引
 
 ## 2. 问题解决
@@ -44,10 +44,10 @@ CREATE INDEX ON btc.utxo USING GIN (tag) WHERE tag IS NOT NULL AND array_length(
 ```sql
 CREATE INDEX ON btc.utxo USING GIN (tag) WHERE tag IS NOT NULL;
 ```
-![drop index](image-1.png)
-![recreate index](image-2.png)
+![drop index](../media/image-1.png)
+![recreate index](../media/image-2.png)
 再次执行同样的查询
-![query after alter index](image-3.png)
+![query after alter index](../media/image-3.png)
 这次耗时降到了5ms，性能提升了73倍，再次查看query plan:
-![query plan after alter index](img_v3_02e8_2cc4749f-162d-4aee-b4fb-1750bc5ecehu-1.jpg)
+![query plan after alter index](../media/img_v3_02e8_2cc4749f-162d-4aee-b4fb-1750bc5ecehu-1.jpg)
 看到这次索引派上用场了！
