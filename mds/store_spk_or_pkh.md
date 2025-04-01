@@ -19,7 +19,7 @@ grant all privileges on all tables in schema btc to developer;
 7. 因为在btc测试网上，出现了错误（Error: index row size exceeds btree version 4 maximum for index），主键索引和唯一性索引太长了超出了btree限制的长度，所以取消了分表，看看单表2亿数据的性能如何； 因为取消了分表，所以临时修改了建表语句，也修改了ON CONFLICT(spk, tx_id, vout)为ON CONLICT(tx_id, vout)
 8. 索引膨胀问题，主键、唯一键已经比数据大了
 
-## unisatd:
+## indexd:
 1. 如果中途同步失败，重新同步的时候，是根据clickhouse的记录来判断起始高度的，这样是有问题的。如果clickhouse写成功了，而redis等其他服务没有写成功，这样就会有遗漏
 
 
@@ -60,10 +60,10 @@ effective_cache_size = '24G'
 
 
 ## 单表确实不行：
-![alt text](<Pasted Graphic.png>)
-![alt text](<Pasted Graphic 1.png>)
+![alt text](<../media/Pasted Graphic.png>)
+![alt text](<../media/Pasted Graphic 1.png>)
 查询高达7分钟
-![alt text](<Pasted Graphic 2.png>)
+![alt text](<../media/Pasted Graphic 2.png>)
 
 ## 索引 & 表大小
 ```sql
@@ -107,10 +107,10 @@ FROM
 ```
 
 ## reindex花了8分钟
-![alt text](REINDEX.png)
+![alt text](../media/REINDEX.png)
 index减少了约90G； 数据38G 索引34G; 定期重建索引是个好主意！！
-![alt text](total_size.png)
+![alt text](../media/total_size.png)
 
 ## 压测
 1. 压测结果 200个地址，都是选用的utxo比较多的地址, utxo数量分布：[662 - 483880]
-![alt text](14.67ms.png)
+![alt text](../media/14.67ms.png)
