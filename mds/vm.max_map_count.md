@@ -5,7 +5,7 @@
 c39653fc9f9c3b73a4f372c4d66aa1b8b6a7beb81d3f7ed39433e1e314d908fb，
 1. 这个交易涉及到5千万的铭文转移，直接把ord干跪了，memory allocation of 4114 bytes failed，内存不够了。
 2. 但是不应该呀，我系统有200G的内存，而`top`观察到虚拟内存使用不过才108G内存，不应该被kill掉呀。
-3. 本能想到先通过`dmesg`看一下，没有OOM纪录，看来不是因为OOM被kill掉的。这点符合实际108G的内存使用 < 机器有200G内存的事实。
+3. 本能想到先通过`dmesg`看一下，没有OOM纪录，看来不是因为OOM被kill掉的(这里补充一下，如果设置vm.overcommit_memory=1, 操作系统不再拒绝进程的内存申请，如果超过系统的内存，会直接被OOM kill掉。而如果vm.overcommit_memory=0或2，则是在申请的时候，发现从操作系统申请不到，程序这一层会失败，不会触发OOM，程序会gracefully shutdown.)。这点符合实际108G的内存使用 < 机器有200G内存的事实。
 4. 那应该是什么地方有进程内存使用限制导致的了。
    1. 先检查下docker-compose.yaml的memlimit,没有限制
    2. rust程序本身也没有设置限制
